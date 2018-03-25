@@ -29,11 +29,14 @@ benchmark time
                    , criterion
                    , deepseq
                    , random, directory
+                   , parsec
                , csv-conduit
                , conduit
                , cassava
                , sv
                , csv
+               , vector
+               , text
 
 executable report
   default-language: Haskell2010
