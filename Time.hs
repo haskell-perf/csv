@@ -13,6 +13,10 @@ import qualified Data.Csv
 import qualified Data.Sv.Parse
 import qualified Data.Text.Encoding as T
 import           Data.Vector (Vector)
+import           Pipes
+import           Pipes.ByteString (fromLazy)
+import qualified Pipes.Csv
+import           Pipes.Safe (runSafeT)
 import           System.Directory
 import qualified Text.CSV
 import qualified Text.Parsec.Error
@@ -34,6 +38,11 @@ main = do
                    case r of
                      Left _ -> error "Unexpected parse error"
                      Right v -> pure v))
+        , bench
+            "pipes-csv/decode/[ByteString]"
+            (nfIO
+               (do src <- fmap fromLazy (L.readFile infp)
+                   runEffect (Pipes.Csv.decode Data.Csv.HasHeader src)))
         , bench
             "csv-conduit/readCSVFile/[ByteString]"
             (nfIO

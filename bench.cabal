@@ -37,6 +37,10 @@ benchmark time
                , csv
                , vector
                , text
+               , pipes
+               , pipes-csv
+               , pipes-bytestring
+               , pipes-safe
 
 executable report
   default-language: Haskell2010
