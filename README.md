@@ -2,6 +2,10 @@
 
 Simple comparative benchmarks for CSV parsing libraries.
 
+The "file" benchmarks are IO-based: reading from a file into a list or
+vector of rows which is then forced with a deepseq. Conveniently, the
+differences between each library are reproducibly distinct.
+
 <!-- RESULTS -->
 
 ## file
@@ -17,4 +21,3 @@ Simple comparative benchmarks for CSV parsing libraries.
 |String/sv/Data.Sv.Parse/attoparsecText|8.873 ms|
 |String/sv/Data.Sv.Parse/attoparsecByteString|9.413 ms|
 |String/sv/Data.Sv.Parse/trifecta|14.76 ms|
-
