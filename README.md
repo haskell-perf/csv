@@ -1,5 +1,7 @@
 # csv
 
+Simple comparative benchmarks for CSV parsing libraries.
+
 <!-- RESULTS -->
 
 ## file
@@ -14,4 +16,3 @@
 |String/sv/Data.Sv.Parse/attoparsecText|8.856 ms|
 |String/sv/Data.Sv.Parse/attoparsecByteString|9.394 ms|
 |String/sv/Data.Sv.Parse/trifecta|14.77 ms|
-
