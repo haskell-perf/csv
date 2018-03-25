@@ -27,6 +27,14 @@ main = do
     [ bgroup
         "file/String"
         [ bench
+            "cassava/decode/Vector ByteString"
+            (nfIO
+               (do r <-
+                     fmap (Data.Csv.decode Data.Csv.HasHeader) (L.readFile infp) :: IO (Either String (Vector (Vector ByteString)))
+                   case r of
+                     Left _ -> error "Unexpected parse error"
+                     Right v -> pure v))
+        , bench
             "cassava/decode/[ByteString]"
             (nfIO
                (do r <-
