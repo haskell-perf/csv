@@ -25,7 +25,7 @@ main = do
   defaultMainWith
     defaultConfig {csvFile = Just fp}
     [ bgroup
-        "file/String"
+        "file (time)"
         [ bench
             "cassava/decode/Vector ByteString"
             (nfIO
@@ -60,7 +60,9 @@ main = do
                (Data.CSV.Conduit.readCSVFile
                   Data.CSV.Conduit.defCSVSettings
                   infp :: IO (Vector [String])))
-        , bench "csv" (nfIO (Text.CSV.parseCSVFromFile infp))
+        , bench
+            "csv/Text.CSV/parseCSVFromFile"
+            (nfIO (Text.CSV.parseCSVFromFile infp))
         , bench
             "sv/Data.Sv.Parse/attoparsecText"
             (nfIO
