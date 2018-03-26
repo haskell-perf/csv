@@ -1,6 +1,5 @@
 resolver: lts-11.1
 extra-deps:
   - weigh-0.0.7
-  - git: https://github.com/qfpl/sv.git
-    commit: f8f7295
+  - sv-0.1
   - validation-1
