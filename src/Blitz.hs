@@ -1,23 +1,14 @@
 {-# LANGUAGE ViewPatterns #-}
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE BangPatterns #-}
+
 -- |
 
 module Blitz where
 
-import           Control.DeepSeq
 import           Data.ByteString (ByteString)
 import qualified Data.ByteString as S
 import qualified Data.ByteString.Char8 as S8
-import           GHC.Generics
-
-data Values
-  = Cons {-# UNPACK #-}!ByteString Values
-  | Nil
-  deriving (Generic, Show)
-instance NFData Values
-
 
 parseFile :: FilePath -> IO [[ByteString]]
 parseFile fp = do
@@ -38,7 +29,7 @@ parseByteString bytes0 = dispatch bytes0 [] []
                     case S8.uncons (S.drop (dropped + idx + 1) bytes') of
                       Just ('"', _) -> string True (dropped + idx + 2)
                       Just (',', _) ->
-                        let prefinalStr = (S.take (dropped + idx + 1) bytes')
+                        let prefinalStr = (S.take (dropped + idx) bytes')
                             finalStr =
                               if extended
                                 then S.intercalate
@@ -52,7 +43,7 @@ parseByteString bytes0 = dispatch bytes0 [] []
                              ((:) finalStr columns)
                              rows
                       Just ('\n', _) ->
-                        let prefinalStr = (S.take (dropped + idx + 1) bytes')
+                        let prefinalStr = (S.take (dropped + idx) bytes')
                             finalStr =
                               if extended
                                 then S.intercalate
@@ -78,10 +69,17 @@ parseByteString bytes0 = dispatch bytes0 [] []
                      ((:) finalStr columns)
                      rows
               | otherwise ->
-                let finalStr = S.take comma bytes
+                let finalStr = S.take n bytes
                 in dispatch
                      (S.drop (n + 1) bytes)
                      []
                      ((:) finalStr columns : rows)
             (Nothing, Just n) -> ((:) (S.take n bytes) columns) : rows
-            x -> error ("Inexhaustive case: " ++ show x)
+            (Nothing, Nothing) ->
+              ((:) (S.take (S.length bytes) bytes) columns) : rows
+            (Just comma, Nothing) ->
+              let finalStr = S.take comma bytes
+              in dispatch
+                   (S.drop (comma + 1) bytes)
+                   ((:) finalStr columns)
+                   rows
