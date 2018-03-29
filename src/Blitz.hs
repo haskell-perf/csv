@@ -10,17 +10,17 @@ import           Data.ByteString (ByteString)
 import qualified Data.ByteString as S
 import qualified Data.ByteString.Char8 as S8
 
-parseFile :: FilePath -> IO [[ByteString]]
+parseFile :: FilePath -> IO (Either String [[ByteString]])
 parseFile fp = do
   bytes0 <- S.readFile fp
   pure (parseByteString bytes0)
 
-parseByteString :: ByteString -> [[ByteString]]
-parseByteString bytes0 = dispatch bytes0 [] []
+parseByteString :: ByteString -> Either String [[ByteString]]
+parseByteString bytes0 = fmap ($ []) (dispatch bytes0 id id)
   where
     dispatch bytes columns rows =
       case S8.uncons bytes of
-        Nothing -> columns : rows
+        Nothing -> Right (rows . (columns [] :))
         Just ('"', bytes') ->
           let string extended dropped =
                 case S8.elemIndex '"' (S.drop dropped bytes') of
@@ -40,7 +40,7 @@ parseByteString bytes0 = dispatch bytes0 [] []
                                 else prefinalStr
                         in dispatch
                              (S.drop (dropped + idx + 2) bytes')
-                             ((:) finalStr columns)
+                             (columns . (finalStr :))
                              rows
                       Just ('\n', _) ->
                         let prefinalStr = (S.take (dropped + idx) bytes')
@@ -54,10 +54,10 @@ parseByteString bytes0 = dispatch bytes0 [] []
                                 else prefinalStr
                         in dispatch
                              (S.drop (dropped + idx + 2) bytes')
-                             []
-                             (((:) finalStr columns) : rows)
-                      Just {} -> error "Expected end of file."
-                      Nothing -> error "End of file?"
+                             id
+                             (rows . ((columns . (finalStr :)) [] :))
+                      Just {} -> Left "Expected end of file."
+                      Nothing -> Left "End of file?"
           in string False 0
         Just _ ->
           case (S8.elemIndex ',' bytes, S8.elemIndex '\n' bytes) of
@@ -66,20 +66,22 @@ parseByteString bytes0 = dispatch bytes0 [] []
                 let finalStr = S.take comma bytes
                 in dispatch
                      (S.drop (comma + 1) bytes)
-                     ((:) finalStr columns)
+                     (columns . (finalStr :))
                      rows
               | otherwise ->
                 let finalStr = S.take n bytes
                 in dispatch
                      (S.drop (n + 1) bytes)
-                     []
-                     ((:) finalStr columns : rows)
-            (Nothing, Just n) -> ((:) (S.take n bytes) columns) : rows
+                     id
+                     (rows . ((columns . (finalStr :)) [] :))
+            (Nothing, Just n) ->
+              Right (rows . ((columns . (S.take n bytes :)) [] :))
             (Nothing, Nothing) ->
-              ((:) (S.take (S.length bytes) bytes) columns) : rows
+              Right
+                (rows . ((columns . (S.take (S.length bytes) bytes :)) [] :))
             (Just comma, Nothing) ->
               let finalStr = S.take comma bytes
               in dispatch
                    (S.drop (comma + 1) bytes)
-                   ((:) finalStr columns)
+                   (columns . (finalStr :))
                    rows
