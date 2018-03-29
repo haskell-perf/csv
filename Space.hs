@@ -2,15 +2,16 @@
 
 module Main (main) where
 
+import           Blitz
 import           Control.DeepSeq
 import           Control.Monad
-import           Data.ByteString          (ByteString)
-import qualified Data.ByteString.Lazy     as L
-import qualified Data.Csv
+import           Data.ByteString (ByteString)
+import qualified Data.ByteString.Lazy as L
 import qualified Data.CSV.Conduit
+import qualified Data.Csv
 import qualified Data.Sv.Parse
-import qualified Data.Text.Encoding       as T
-import           Data.Vector              (Vector)
+import qualified Data.Text.Encoding as T
+import           Data.Vector (Vector)
 import           System.Directory
 import qualified Text.CSV
 import qualified Text.CSV.Lazy.ByteString
@@ -25,24 +26,27 @@ main = do
   mainWith
     (do setColumns [Case, Allocated, Max, Live, GCs]
         sequence_
-          [ action
+          [ action "blitz/parseFile" (Blitz.parseFile infp)
+          , action
               "cassava/decode/Vector ByteString"
               (do r <-
                     fmap (Data.Csv.decode Data.Csv.HasHeader) (L.readFile infp) :: IO (Either String (Vector (Vector ByteString)))
                   case r of
-                    Left _  -> error "Unexpected parse error"
+                    Left _ -> error "Unexpected parse error"
                     Right v -> pure v)
           , action
               "cassava/decode/[ByteString]"
               (do r <-
                     fmap (Data.Csv.decode Data.Csv.HasHeader) (L.readFile infp) :: IO (Either String (Vector [ByteString]))
                   case r of
-                    Left _  -> error "Unexpected parse error"
+                    Left _ -> error "Unexpected parse error"
                     Right v -> pure v)
           , action
               "lazy-csv/parseCsv/[ByteString]"
-                (do r <- fmap Text.CSV.Lazy.ByteString.parseCSV (L.readFile infp)
-                    pure $ Text.CSV.Lazy.ByteString.fromCSVTable $ Text.CSV.Lazy.ByteString.csvTableFull r)
+              (do r <- fmap Text.CSV.Lazy.ByteString.parseCSV (L.readFile infp)
+                  pure $
+                    Text.CSV.Lazy.ByteString.fromCSVTable $
+                    Text.CSV.Lazy.ByteString.csvTableFull r)
           , action
               "csv-conduit/readCSVFile/[ByteString]"
               (Data.CSV.Conduit.readCSVFile Data.CSV.Conduit.defCSVSettings infp :: IO (Vector [ByteString]))
