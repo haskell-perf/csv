@@ -9,6 +9,7 @@ module Blitz where
 import           Data.ByteString (ByteString)
 import qualified Data.ByteString as S
 import qualified Data.ByteString.Char8 as S8
+import qualified Data.DList as DL
 
 parseFile :: FilePath -> IO (Either String [[ByteString]])
 parseFile fp = do
@@ -16,11 +17,11 @@ parseFile fp = do
   pure (parseByteString bytes0)
 
 parseByteString :: ByteString -> Either String [[ByteString]]
-parseByteString bytes0 = fmap ($ []) (dispatch bytes0 id id)
+parseByteString bytes0 = fmap DL.toList (dispatch bytes0 DL.empty DL.empty)
   where
     dispatch bytes columns rows =
       case S8.uncons bytes of
-        Nothing -> Right (rows . (columns [] :))
+        Nothing -> Right (DL.snoc rows (DL.toList columns))
         Just ('"', bytes') -> quoted columns rows bytes' False 0
         Just _ -> unquoted bytes columns rows
     unquoted bytes columns rows =
@@ -28,20 +29,26 @@ parseByteString bytes0 = fmap ($ []) (dispatch bytes0 id id)
         (Just comma, Just n)
           | comma < n ->
             let finalStr = S.take comma bytes
-            in dispatch (S.drop (comma + 1) bytes) (columns . (finalStr :)) rows
+            in dispatch
+                 (S.drop (comma + 1) bytes)
+                 (DL.snoc columns finalStr)
+                 rows
           | otherwise ->
             let finalStr = S.take n bytes
             in dispatch
                  (S.drop (n + 1) bytes)
-                 id
-                 (rows . ((columns . (finalStr :)) [] :))
+                 DL.empty
+                 (DL.snoc rows (DL.toList (DL.snoc columns finalStr)))
         (Nothing, Just n) ->
-          Right (rows . ((columns . (S.take n bytes :)) [] :))
+          Right (DL.snoc rows (DL.toList (DL.snoc columns (S.take n bytes))))
         (Nothing, Nothing) ->
-          Right (rows . ((columns . (S.take (S.length bytes) bytes :)) [] :))
+          Right
+            (DL.snoc
+               rows
+               (DL.toList (DL.snoc columns (S.take (S.length bytes) bytes))))
         (Just comma, Nothing) ->
           let finalStr = S.take comma bytes
-          in dispatch (S.drop (comma + 1) bytes) (columns . (finalStr :)) rows
+          in dispatch (S.drop (comma + 1) bytes) (DL.snoc columns finalStr) rows
     quoted columns rows bytes' extended dropped =
       case S8.elemIndex '"' (S.drop dropped bytes') of
         Nothing -> error "Unterminated quoted field."
@@ -65,5 +72,5 @@ parseByteString bytes0 = fmap ($ []) (dispatch bytes0 id id)
                           else prefinalStr
                   in dispatch
                        (S.drop (nextQuoteIdx + 2) bytes')
-                       (columns . (finalStr :))
+                       (DL.snoc columns finalStr)
                        rows
