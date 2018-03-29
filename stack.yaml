@@ -3,3 +3,4 @@ extra-deps:
   - weigh-0.0.7
   - sv-0.1
   - validation-1
+  - lazy-csv-0.5.1
