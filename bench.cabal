@@ -21,6 +21,7 @@ test-suite space
     , cassava
     , sv
     , csv
+    , lazy-csv
     , vector
     , text
 
@@ -42,6 +43,7 @@ benchmark time
     , cassava
     , sv
     , csv
+    , lazy-csv
     , vector
     , text
 

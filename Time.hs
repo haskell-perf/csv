@@ -6,15 +6,16 @@ import           Control.DeepSeq
 import           Control.Monad
 import           Criterion.Main
 import           Criterion.Types
-import           Data.ByteString (ByteString)
-import qualified Data.ByteString.Lazy as L
-import qualified Data.CSV.Conduit
+import           Data.ByteString          (ByteString)
+import qualified Data.ByteString.Lazy     as L
 import qualified Data.Csv
+import qualified Data.CSV.Conduit
 import qualified Data.Sv.Parse
-import qualified Data.Text.Encoding as T
-import           Data.Vector (Vector)
+import qualified Data.Text.Encoding       as T
+import           Data.Vector              (Vector)
 import           System.Directory
 import qualified Text.CSV
+import qualified Text.CSV.Lazy.ByteString
 import qualified Text.Parsec.Error
 
 main :: IO ()
@@ -32,7 +33,7 @@ main = do
                (do r <-
                      fmap (Data.Csv.decode Data.Csv.HasHeader) (L.readFile infp) :: IO (Either String (Vector (Vector ByteString)))
                    case r of
-                     Left _ -> error "Unexpected parse error"
+                     Left _  -> error "Unexpected parse error"
                      Right v -> pure v))
         , bench
             "cassava/decode/[ByteString]"
@@ -40,8 +41,13 @@ main = do
                (do r <-
                      fmap (Data.Csv.decode Data.Csv.HasHeader) (L.readFile infp) :: IO (Either String (Vector [ByteString]))
                    case r of
-                     Left _ -> error "Unexpected parse error"
+                     Left _  -> error "Unexpected parse error"
                      Right v -> pure v))
+        , bench
+            "lazy-csv/parseCsv/[ByteString]"
+            (nfIO
+                (do r <- fmap Text.CSV.Lazy.ByteString.parseCSV (L.readFile infp)
+                    pure $ Text.CSV.Lazy.ByteString.fromCSVTable $ Text.CSV.Lazy.ByteString.csvTableFull r))
         , bench
             "csv-conduit/readCSVFile/[ByteString]"
             (nfIO
