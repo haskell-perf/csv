@@ -51,14 +51,14 @@ parseByteString bytes0 = fmap DL.toList (dispatch bytes0 DL.empty DL.empty)
           in dispatch (S.drop (comma + 1) bytes) (DL.snoc columns finalStr) rows
     quoted columns rows bytes' extended dropped =
       case S8.elemIndex '"' (S.drop dropped bytes') of
-        Nothing -> error "Unterminated quoted field."
+        Nothing -> Left "Unterminated quoted field."
         Just idx ->
           case S8.uncons (S.drop (nextQuoteIdx + 1) bytes') of
             Just ('"', _) -> quoted columns rows bytes' True (nextQuoteIdx + 2)
             Just (',', _) -> finishStringBeforeDelim
             Just ('\n', _) -> finishStringBeforeDelim
             Just {} -> Left "Expected end of file."
-            Nothing -> Left "End of file?"
+            _ -> finishStringBeforeDelim
           where nextQuoteIdx = dropped + idx
                 finishStringBeforeDelim =
                   let prefinalStr = S.take nextQuoteIdx bytes'
