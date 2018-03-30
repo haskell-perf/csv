@@ -27,6 +27,7 @@ test-suite space
     , text
     , QuickCheck
     , dlist
+    , exceptions
 
 benchmark time
   hs-source-dirs: src, .
@@ -51,6 +52,7 @@ benchmark time
     , vector
     , text
     , dlist
+    , exceptions
 
 executable report
   default-language: Haskell2010

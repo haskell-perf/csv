@@ -6,22 +6,31 @@
 
 module Blitz where
 
+import           Control.Monad.Catch
 import           Data.ByteString (ByteString)
 import qualified Data.ByteString as S
 import qualified Data.ByteString.Char8 as S8
 import qualified Data.DList as DL
+import           Data.Typeable
 
-parseFile :: FilePath -> IO (Either String [[ByteString]])
+data BlitzException =
+  UnterminatedQuotedField | ExpectedEndOfFile
+  deriving (Show, Typeable)
+instance Exception BlitzException
+
+parseFile :: FilePath -> IO [[ByteString]]
 parseFile fp = do
   bytes0 <- S.readFile fp
-  pure (parseByteString bytes0)
+  parseByteString bytes0
 
-parseByteString :: ByteString -> Either String [[ByteString]]
+{-# SPECIALIZE parseByteString :: ByteString -> IO [[ByteString]] #-}
+{-# SPECIALIZE parseByteString :: ByteString -> Either SomeException [[ByteString]] #-}
+parseByteString :: MonadThrow m => ByteString -> m [[ByteString]]
 parseByteString bytes0 = fmap DL.toList (dispatch bytes0 DL.empty DL.empty)
   where
     dispatch bytes columns rows =
       case S8.uncons bytes of
-        Nothing -> Right (DL.snoc rows (DL.toList columns))
+        Nothing -> pure (DL.snoc rows (DL.toList columns))
         Just ('"', bytes') -> quoted columns rows bytes' False 0
         Just _ -> unquoted bytes columns rows
     unquoted bytes columns rows =
@@ -40,9 +49,9 @@ parseByteString bytes0 = fmap DL.toList (dispatch bytes0 DL.empty DL.empty)
                  DL.empty
                  (DL.snoc rows (DL.toList (DL.snoc columns finalStr)))
         (Nothing, Just n) ->
-          Right (DL.snoc rows (DL.toList (DL.snoc columns (S.take n bytes))))
+          pure (DL.snoc rows (DL.toList (DL.snoc columns (S.take n bytes))))
         (Nothing, Nothing) ->
-          Right
+          pure
             (DL.snoc
                rows
                (DL.toList (DL.snoc columns (S.take (S.length bytes) bytes))))
@@ -51,13 +60,13 @@ parseByteString bytes0 = fmap DL.toList (dispatch bytes0 DL.empty DL.empty)
           in dispatch (S.drop (comma + 1) bytes) (DL.snoc columns finalStr) rows
     quoted columns rows bytes' extended dropped =
       case S8.elemIndex '"' (S.drop dropped bytes') of
-        Nothing -> Left "Unterminated quoted field."
+        Nothing -> throwM UnterminatedQuotedField
         Just idx ->
           case S8.uncons (S.drop (nextQuoteIdx + 1) bytes') of
             Just ('"', _) -> quoted columns rows bytes' True (nextQuoteIdx + 2)
             Just (',', _) -> finishStringBeforeDelim
             Just ('\n', _) -> finishStringBeforeDelim
-            Just {} -> Left "Expected end of file."
+            Just {} -> throwM ExpectedEndOfFile
             _ -> finishStringBeforeDelim
           where nextQuoteIdx = dropped + idx
                 finishStringBeforeDelim =

@@ -17,7 +17,7 @@ The script generates a file of 1,000 rows, of 20 fields with `[a-zA-z0-9]` and
 
 | Case                                      | Allocated   | Max       | Live       | GCs |
 |-------------------------------------------|-------------|-----------|------------|-----|
-| blitz/parseFile                           | 2,640,880   | 10,280    | 24,256     |   2 |
+| blitz/parseFile                           | 2,640,880   | 392       | 14,368     |   2 |
 | cassava/decode/Vector ByteString          | 8,248,240   | 9,200     | 23,584     |   4 |
 | cassava/decode/[ByteString]               | 10,733,192  | 9,128     | 23,392     |   6 |
 | lazy-csv/parseCsv/[ByteString]            | 17,848,264  | 1,121,216 | 1,191,072  |  16 |
