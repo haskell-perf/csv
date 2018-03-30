@@ -6,9 +6,6 @@ The "file" benchmarks are IO-based: reading from a file into a list or
 vector of rows which is then forced with a deepseq. Conveniently, the
 differences between each library are reproducibly distinct.
 
-See the [blitz](https://github.com/haskell-perf/csv/tree/blitz) branch
-for a simple CSV parser which is more efficient than any of the below.
-
 ## Generated data with:
 
 The script generates a file of 1,000 rows, of 20 fields with `[a-zA-z0-9]` and
