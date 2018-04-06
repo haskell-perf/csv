@@ -11,7 +11,7 @@ differences between each library are reproducibly distinct.
 The script generates a file of 1,000 rows, of 20 fields with `[a-zA-z0-9]` and
 `[," \r\n\t]`, ensuring that the full range of CSV is tested:
 
-    stack ghc -- Generate.hs -o generate && ./generate > in.csv
+    stack exec generate > in.csv
 
 ## file (space)
 
