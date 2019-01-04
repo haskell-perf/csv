@@ -8,8 +8,8 @@ import           Data.ByteString          (ByteString)
 import qualified Data.ByteString.Lazy     as L
 import qualified Data.Csv
 import qualified Data.CSV.Conduit
-import qualified Data.Sv.Parse
-import qualified Data.Text.Encoding       as T
+import qualified Data.Sv
+import qualified Data.Sv.Decode
 import           Data.Vector              (Vector)
 import           System.Directory
 import qualified Text.CSV
@@ -30,19 +30,27 @@ main = do
               (do r <-
                     fmap (Data.Csv.decode Data.Csv.HasHeader) (L.readFile infp) :: IO (Either String (Vector (Vector ByteString)))
                   case r of
-                    Left _  -> error "Unexpected parse error"
+                    Left _ -> error "Unexpected parse error"
                     Right v -> pure v)
           , action
               "cassava/decode/[ByteString]"
               (do r <-
                     fmap (Data.Csv.decode Data.Csv.HasHeader) (L.readFile infp) :: IO (Either String (Vector [ByteString]))
                   case r of
-                    Left _  -> error "Unexpected parse error"
+                    Left _ -> error "Unexpected parse error"
                     Right v -> pure v)
           , action
+              "sv/Data.Sv/parseDecodeFromFile"
+              (Data.Sv.parseDecodeFromFile
+                 Data.Sv.Decode.row
+                 Data.Sv.defaultParseOptions
+                 infp)
+          , action
               "lazy-csv/parseCsv/[ByteString]"
-                (do r <- fmap Text.CSV.Lazy.ByteString.parseCSV (L.readFile infp)
-                    pure $ Text.CSV.Lazy.ByteString.fromCSVTable $ Text.CSV.Lazy.ByteString.csvTableFull r)
+              (do r <- fmap Text.CSV.Lazy.ByteString.parseCSV (L.readFile infp)
+                  pure $
+                    Text.CSV.Lazy.ByteString.fromCSVTable $
+                    Text.CSV.Lazy.ByteString.csvTableFull r)
           , action
               "csv-conduit/readCSVFile/[ByteString]"
               (Data.CSV.Conduit.readCSVFile Data.CSV.Conduit.defCSVSettings infp :: IO (Vector [ByteString]))
@@ -55,24 +63,6 @@ main = do
           , action
               "csv/Text.CSV/parseCSVFromFile"
               (Text.CSV.parseCSVFromFile infp)
-          , action
-              "sv/Data.Sv.Parse/attoparsecText"
-              (Data.Sv.Parse.parseSvFromFile'
-                 Data.Sv.Parse.attoparsecText
-                 (fmap T.decodeUtf8 Data.Sv.Parse.defaultParseOptions)
-                 infp)
-          , action
-              "sv/Data.Sv.Parse/attoparsecByteString"
-              (Data.Sv.Parse.parseSvFromFile'
-                 Data.Sv.Parse.attoparsecByteString
-                 Data.Sv.Parse.defaultParseOptions
-                 infp)
-          , action
-              "sv/Data.Sv.Parse/trifecta"
-              (Data.Sv.Parse.parseSvFromFile'
-                 Data.Sv.Parse.trifecta
-                 Data.Sv.Parse.defaultParseOptions
-                 infp)
           ])
 
 -- | We don't need to force error messages, the test suite only parses
