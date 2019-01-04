@@ -15,18 +15,16 @@ The script generates a file of 1,000 rows, of 20 fields with `[a-zA-z0-9]` and
 
 ## file (space)
 
-| Case                                      | Allocated   | Max       | Live       | GCs |
-|-------------------------------------------|-------------|-----------|------------|-----|
-| cassava/decode/Vector ByteString          | 8,248,072   | 9,200     | 21,952     |   4 |
-| cassava/decode/[ByteString]               | 10,733,024  | 9,128     | 21,760     |   6 |
-| lazy-csv/parseCsv/[ByteString]            | 17,850,680  | 1,121,416 | 1,188,072  |  16 |
-| csv-conduit/readCSVFile/[ByteString]      | 26,999,080  | 1,203,616 | 1,246,064  |  25 |
-| csv-conduit/readCSVFile/Vector ByteString | 27,927,832  | 1,199,048 | 1,241,920  |  26 |
-| csv-conduit/readCSVFile/[String]          | 34,273,120  | 2,547,808 | 3,793,160  |  32 |
-| csv/Text.CSV/parseCSVFromFile             | 136,246,608 | 3,863,224 | 13,062,488 | 133 |
-| sv/Data.Sv.Parse/attoparsecText           | 109,841,544 | 5,216,576 | 12,495,160 | 105 |
-| sv/Data.Sv.Parse/attoparsecByteString     | 99,511,624  | 7,149,104 | 18,078,928 |  95 |
-| sv/Data.Sv.Parse/trifecta                 | 270,332,368 | 9,278,552 | 23,874,512 | 259 |
+| Case                                      | Allocated   | Max       | Live      | GCs |
+|-------------------------------------------|-------------|-----------|-----------|-----|
+| cassava/decode/Vector ByteString          | 8,187,688   | 9,328     | 20,584    |   4 |
+| cassava/decode/[ByteString]               | 10,424,808  | 9,256     | 20,392    |   6 |
+| sv/Data.Sv/parseDecodeFromFile            | 13,893,912  | 1,191,464 | 1,256,184 |  10 |
+| lazy-csv/parseCsv/[ByteString]            | 17,851,008  | 1,121,544 | 1,185,336 |  16 |
+| csv-conduit/readCSVFile/[ByteString]      | 27,012,448  | 1,204,504 | 1,244,456 |  25 |
+| csv-conduit/readCSVFile/Vector ByteString | 27,973,968  | 1,231,656 | 1,303,896 |  26 |
+| csv-conduit/readCSVFile/[String]          | 34,319,272  | 2,828,712 | 4,134,544 |  32 |
+| csv/Text.CSV/parseCSVFromFile             | 141,654,888 | 3,376,504 | 8,840,696 | 140 |
 
 <!-- RESULTS -->
 
@@ -34,13 +32,11 @@ The script generates a file of 1,000 rows, of 20 fields with `[a-zA-z0-9]` and
 
 |Name||
 |---|---|
-|cassava/decode/Vector ByteString|1.612 ms|
-|cassava/decode/[ByteString]|2.137 ms|
-|lazy-csv/parseCsv/[ByteString]|2.815 ms|
-|csv-conduit/readCSVFile/[ByteString]|7.661 ms|
-|csv-conduit/readCSVFile/Vector ByteString|8.027 ms|
-|csv-conduit/readCSVFile/[String]|12.15 ms|
-|csv/Text.CSV/parseCSVFromFile|29.21 ms|
-|sv/Data.Sv.Parse/attoparsecText|38.08 ms|
-|sv/Data.Sv.Parse/attoparsecByteString|44.54 ms|
-|sv/Data.Sv.Parse/trifecta|71.36 ms|
+|cassava/decode/Vector ByteString|1.666 ms|
+|cassava/decode/[ByteString]|2.191 ms|
+|lazy-csv/parseCsv/[ByteString]|3.034 ms|
+|sv/Data.Sv/parseDecodeFromFile|3.838 ms|
+|csv-conduit/readCSVFile/[ByteString]|8.016 ms|
+|csv-conduit/readCSVFile/Vector ByteString|8.482 ms|
+|csv-conduit/readCSVFile/[String]|12.47 ms|
+|csv/Text.CSV/parseCSVFromFile|29.56 ms|
