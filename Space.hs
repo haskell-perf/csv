@@ -8,8 +8,8 @@ import           Data.ByteString          (ByteString)
 import qualified Data.ByteString.Lazy     as L
 import qualified Data.Csv
 import qualified Data.CSV.Conduit
-import qualified Data.Sv.Parse
-import qualified Data.Text.Encoding       as T
+import qualified Data.Sv
+import qualified Data.Sv.Decode
 import           Data.Vector              (Vector)
 import           System.Directory
 import qualified Text.CSV
@@ -56,22 +56,10 @@ main = do
               "csv/Text.CSV/parseCSVFromFile"
               (Text.CSV.parseCSVFromFile infp)
           , action
-              "sv/Data.Sv.Parse/attoparsecText"
-              (Data.Sv.Parse.parseSvFromFile'
-                 Data.Sv.Parse.attoparsecText
-                 (fmap T.decodeUtf8 Data.Sv.Parse.defaultParseOptions)
-                 infp)
-          , action
-              "sv/Data.Sv.Parse/attoparsecByteString"
-              (Data.Sv.Parse.parseSvFromFile'
-                 Data.Sv.Parse.attoparsecByteString
-                 Data.Sv.Parse.defaultParseOptions
-                 infp)
-          , action
-              "sv/Data.Sv.Parse/trifecta"
-              (Data.Sv.Parse.parseSvFromFile'
-                 Data.Sv.Parse.trifecta
-                 Data.Sv.Parse.defaultParseOptions
+              "sv/Data.Sv/parseDecodeFromFile"
+              (Data.Sv.parseDecodeFromFile
+                 Data.Sv.Decode.row
+                 Data.Sv.defaultParseOptions
                  infp)
           ])
 

@@ -1,6 +1,21 @@
-resolver: lts-11.1
+resolver: lts-13.1
 extra-deps:
   - weigh-0.0.7
-  - sv-0.1
+  - sv-1.2
   - validation-1
   - lazy-csv-0.5.1
+  - csv-conduit-0.7.0.0
+  - hw-dsv-0.3.2
+  - hw-simd-0.1.1.2
+
+flags:
+  bits-extra:
+    bmi2: true
+  hw-dsv:
+    bmi2: true
+  hw-rankselect:
+    bmi2: true
+  hw-rankselect-base:
+    bmi2: true
+  hw-simd:
+    bmi2: true

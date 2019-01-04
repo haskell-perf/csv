@@ -10,8 +10,8 @@ import           Data.ByteString          (ByteString)
 import qualified Data.ByteString.Lazy     as L
 import qualified Data.Csv
 import qualified Data.CSV.Conduit
-import qualified Data.Sv.Parse
-import qualified Data.Text.Encoding       as T
+import qualified Data.Sv
+import qualified Data.Sv.Decode
 import           Data.Vector              (Vector)
 import           System.Directory
 import qualified Text.CSV
@@ -70,25 +70,11 @@ main = do
             "csv/Text.CSV/parseCSVFromFile"
             (nfIO (Text.CSV.parseCSVFromFile infp))
         , bench
-            "sv/Data.Sv.Parse/attoparsecText"
+            "sv/Data.Sv/parseDecodeFromFile"
             (nfIO
-               (Data.Sv.Parse.parseSvFromFile'
-                  Data.Sv.Parse.attoparsecText
-                  (fmap T.decodeUtf8 Data.Sv.Parse.defaultParseOptions)
-                  infp))
-        , bench
-            "sv/Data.Sv.Parse/attoparsecByteString"
-            (nfIO
-               (Data.Sv.Parse.parseSvFromFile'
-                  Data.Sv.Parse.attoparsecByteString
-                  Data.Sv.Parse.defaultParseOptions
-                  infp))
-        , bench
-            "sv/Data.Sv.Parse/trifecta"
-            (nfIO
-               (Data.Sv.Parse.parseSvFromFile'
-                  Data.Sv.Parse.trifecta
-                  Data.Sv.Parse.defaultParseOptions
+               (Data.Sv.parseDecodeFromFile
+                  Data.Sv.Decode.row
+                  Data.Sv.defaultParseOptions
                   infp))
         ]
     ]
